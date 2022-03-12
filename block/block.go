@@ -24,6 +24,14 @@ func (b *Block) GetHash() string {
 	return b.hash
 }
 
+func (b *Block) GetData() string {
+	return b.data
+}
+
+func (b *Block) GetPrevHash() string {
+	return b.prevHash
+}
+
 func CreateBlock(data, lastHash string) *Block {
 	newBlock := Block{data: data, hash: "", prevHash: ""}
 	newBlock.setPrevHash(lastHash)
