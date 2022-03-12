@@ -2,19 +2,17 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/daveg7lee/nomadcoin/blockchain"
+	"log"
+	"net/http"
 )
 
+const port string = ":4000"
+
+func handleHome(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Hello from home!")
+}
+
 func main() {
-	chain := blockchain.GetBlockchain()
-	chain.AddBlock("Second Block")
-	chain.AddBlock("Thrid Block")
-	chain.AddBlock("Fourth Block")
-	chain.AddBlock("Fifth Block")
-	for _, block := range chain.GetAllBlocks() {
-		fmt.Println(block.GetData())
-		fmt.Println(block.GetHash())
-		fmt.Println(block.GetPrevHash())
-	}
+	http.HandleFunc("/", handleHome)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
