@@ -9,6 +9,7 @@ import (
 
 	"github.com/daveg7lee/nomadcoin/block"
 	"github.com/daveg7lee/nomadcoin/blockchain"
+	"github.com/gorilla/mux"
 )
 
 const templateDir string = "explorer/templates/"
@@ -58,13 +59,13 @@ func loadTemplates() {
 }
 
 func Start(portNum int) {
+	router := mux.NewRouter()
 	port := fmt.Sprintf(":%d", portNum)
-	handler := http.NewServeMux()
 
 	loadTemplates()
-	handler.HandleFunc("/", handleHome)
-	handler.HandleFunc("/add", handleAdd)
+	router.HandleFunc("/", handleHome).Methods("GET")
+	router.HandleFunc("/add", handleAdd).Methods("GET, POST")
 
 	fmt.Printf("Explorer Server listening on http://localhost%s\n", port)
-	log.Fatal(http.ListenAndServe(port, handler))
+	log.Fatal(http.ListenAndServe(port, router))
 }

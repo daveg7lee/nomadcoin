@@ -8,6 +8,7 @@ import (
 
 	"github.com/daveg7lee/nomadcoin/blockchain"
 	"github.com/daveg7lee/nomadcoin/utils"
+	"github.com/gorilla/mux"
 )
 
 var port string
@@ -43,13 +44,13 @@ func createDocs() []document {
 			Description: "Get all blocks",
 		},
 		{
-			URL:         url("/blocks"),
+			URL:         url("/block"),
 			Method:      "POST",
 			Description: "Add a Block",
 			Payload:     "data:string",
 		},
 		{
-			URL:         url("/blocks/{id}"),
+			URL:         url("/block/{id}"),
 			Method:      "GET",
 			Description: "See a block",
 		},
@@ -63,20 +64,25 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBlocks(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "GET":
-		getBlocks(w)
-	case "POST":
-		postBlocks(w, r)
-	}
-}
-
-func getBlocks(w http.ResponseWriter) {
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(blockchain.GetBlockchain().GetAllBlocks())
 }
 
-func postBlocks(w http.ResponseWriter, r *http.Request) {
+func handleBlock(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		getBlock(w, r)
+	case "POST":
+		postBlock(w, r)
+	}
+}
+
+func getBlock(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+}
+
+func postBlock(w http.ResponseWriter, r *http.Request) {
 	var addBlockBody addBlockBody
 
 	utils.HandleErr(json.NewDecoder(r.Body).Decode(&addBlockBody))
@@ -85,12 +91,14 @@ func postBlocks(w http.ResponseWriter, r *http.Request) {
 }
 
 func Start(portNum int) {
-	handler := http.NewServeMux()
+	router := mux.NewRouter()
 	port = fmt.Sprintf(":%d", portNum)
 
-	handler.HandleFunc("/", handleDocs)
-	handler.HandleFunc("/blocks", handleBlocks)
+	router.HandleFunc("/", handleDocs).Methods("GET")
+	router.HandleFunc("/blocks", handleBlocks).Methods("GET")
+	router.HandleFunc("/block", handleBlock).Methods("POST")
+	router.HandleFunc("/block/{id:[0-9]+}", handleBlock).Methods("GET")
 
-	fmt.Printf("Server listening on http://localhost%s\n", port)
-	log.Fatal(http.ListenAndServe(port, handler))
+	fmt.Printf("Rest Server listening on http://localhost%s\n", port)
+	log.Fatal(http.ListenAndServe(port, router))
 }
