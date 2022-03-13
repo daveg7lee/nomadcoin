@@ -11,10 +11,7 @@ import (
 	"github.com/daveg7lee/nomadcoin/blockchain"
 )
 
-const (
-	port        string = ":4000"
-	templateDir string = "explorer/templates/"
-)
+const templateDir string = "explorer/templates/"
 
 var templates *template.Template
 
@@ -30,7 +27,6 @@ func getYear() int {
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(blockchain.GetBlockchain().GetAllBlocks())
 	data := pageData{PageTitle: "Home", Blocks: blockchain.GetBlockchain().GetAllBlocks(), Year: getYear()}
 	templates.ExecuteTemplate(w, "home", data)
 }
@@ -61,10 +57,14 @@ func loadTemplates() {
 	templates = template.Must(templates.ParseGlob(templateDir + "partials/*.gohtml"))
 }
 
-func Start() {
-	fmt.Printf("Server running on http://localhost%s\n", port)
+func Start(portNum int) {
+	port := fmt.Sprintf(":%d", portNum)
+	handler := http.NewServeMux()
+
 	loadTemplates()
-	http.HandleFunc("/", handleHome)
-	http.HandleFunc("/add", handleAdd)
-	log.Fatal(http.ListenAndServe(port, nil))
+	handler.HandleFunc("/", handleHome)
+	handler.HandleFunc("/add", handleAdd)
+
+	fmt.Printf("Explorer Server listening on http://localhost%s\n", port)
+	log.Fatal(http.ListenAndServe(port, handler))
 }
