@@ -6,35 +6,18 @@ import (
 )
 
 type Block struct {
-	data     string
-	hash     string
-	prevHash string
+	Data     string `json:"data"`
+	Hash     string `json:"hash"`
+	PrevHash string `json:"previous hash,omitempty"`
 }
 
 func (b *Block) calculateHash() {
-	hash := sha256.Sum256([]byte(b.data + b.prevHash))
-	b.hash = fmt.Sprintf("%x", hash)
-}
-
-func (b *Block) setPrevHash(prevHash string) {
-	b.prevHash = prevHash
-}
-
-func (b *Block) GetHash() string {
-	return b.hash
-}
-
-func (b *Block) GetData() string {
-	return b.data
-}
-
-func (b *Block) GetPrevHash() string {
-	return b.prevHash
+	hash := sha256.Sum256([]byte(b.Data + b.PrevHash))
+	b.Hash = fmt.Sprintf("%x", hash)
 }
 
 func CreateBlock(data, lastHash string) *Block {
-	newBlock := Block{data: data, hash: "", prevHash: ""}
-	newBlock.setPrevHash(lastHash)
+	newBlock := Block{Data: data, Hash: "", PrevHash: lastHash}
 	newBlock.calculateHash()
 	return &newBlock
 }

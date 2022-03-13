@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/daveg7lee/nomadcoin/blockchain"
+	"github.com/daveg7lee/nomadcoin/utils"
 )
 
 const port string = ":4000"
@@ -16,6 +19,10 @@ type URLDescription struct {
 	Method      string `json:"method"`
 	Description string `json:"description"`
 	Payload     string `json:"payload,omitempty"`
+}
+
+type AddBlockBody struct {
+	Message string
 }
 
 func (u URL) MarshalText() ([]byte, error) {
@@ -31,22 +38,54 @@ func createDocs() []URLDescription {
 			Description: "See Documentation",
 		},
 		{
-			URL:         URL("/block"),
+			URL:         URL("/blocks"),
+			Method:      "GET",
+			Description: "Get all blocks",
+		},
+		{
+			URL:         URL("/blocks"),
 			Method:      "POST",
 			Description: "Add a Block",
 			Payload:     "data:string",
 		},
+		{
+			URL:         URL("/blocks/{id}"),
+			Method:      "GET",
+			Description: "See a block",
+		},
 	}
 }
 
-func handleHome(w http.ResponseWriter, r *http.Request) {
+func handleDocs(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	docs := createDocs()
 	json.NewEncoder(w).Encode(docs)
 }
 
+func handleBlocks(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		getBlocks(w)
+	case "POST":
+		postBlocks(w, r)
+	}
+}
+
+func getBlocks(w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(blockchain.GetBlockchain().GetAllBlocks())
+}
+
+func postBlocks(w http.ResponseWriter, r *http.Request) {
+	var addBlockBody AddBlockBody
+	utils.HandleErr(json.NewDecoder(r.Body).Decode(&addBlockBody))
+	blockchain.GetBlockchain().AddBlock(addBlockBody.Message)
+	w.WriteHeader(http.StatusCreated)
+}
+
 func main() {
 	fmt.Printf("Server listening on http://localhost%s\n", port)
-	http.HandleFunc("/", handleHome)
+	http.HandleFunc("/", handleDocs)
+	http.HandleFunc("/blocks", handleBlocks)
 	log.Fatal(http.ListenAndServe(port, nil))
 }

@@ -23,7 +23,7 @@ func (b *blockchain) getLastHash() string {
 	if totalBlocks == 0 {
 		return ""
 	}
-	return b.blocks[totalBlocks-1].GetHash()
+	return b.blocks[totalBlocks-1].Hash
 }
 
 func (b *blockchain) GetAllBlocks() []*block.Block {

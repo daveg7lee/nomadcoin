@@ -30,6 +30,7 @@ func getYear() int {
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(blockchain.GetBlockchain().GetAllBlocks())
 	data := pageData{PageTitle: "Home", Blocks: blockchain.GetBlockchain().GetAllBlocks(), Year: getYear()}
 	templates.ExecuteTemplate(w, "home", data)
 }
