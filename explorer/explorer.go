@@ -5,10 +5,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/daveg7lee/nomadcoin/block"
 	"github.com/daveg7lee/nomadcoin/blockchain"
-	"github.com/daveg7lee/nomadcoin/utils"
 )
 
 const (
@@ -24,8 +24,13 @@ type pageData struct {
 	Year      int
 }
 
+func getYear() int {
+	now := time.Now()
+	return now.Year()
+}
+
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	data := pageData{PageTitle: "Home", Blocks: blockchain.GetBlockchain().GetAllBlocks(), Year: utils.GetYear()}
+	data := pageData{PageTitle: "Home", Blocks: blockchain.GetBlockchain().GetAllBlocks(), Year: getYear()}
 	templates.ExecuteTemplate(w, "home", data)
 }
 
@@ -39,7 +44,7 @@ func handleAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdd(w http.ResponseWriter) {
-	data := pageData{PageTitle: "Add", Year: utils.GetYear()}
+	data := pageData{PageTitle: "Add", Year: getYear()}
 	templates.ExecuteTemplate(w, "add", data)
 }
 
