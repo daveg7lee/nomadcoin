@@ -5,29 +5,37 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/daveg7lee/nomadcoin/utils"
 )
 
 const port string = ":4000"
 
 type URLDescription struct {
-	URL         string
-	Method      string
-	Description string
+	URL         string `json:"url"`
+	Method      string `json:"method"`
+	Description string `json:"description"`
+	Payload     string `json:"payload,omitempty"`
 }
 
-func handleHome(w http.ResponseWriter, r *http.Request) {
-	data := []URLDescription{
+func createDocs() []URLDescription {
+	return []URLDescription{
 		{
 			URL:         "/",
 			Method:      "GET",
 			Description: "See Documentation",
 		},
+		{
+			URL:         "/block",
+			Method:      "POST",
+			Description: "Add a Block",
+			Payload:     "data:string",
+		},
 	}
-	bytes, err := json.Marshal(data)
-	utils.HandleErr(err)
+}
 
+func handleHome(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	docs := createDocs()
+	json.NewEncoder(w).Encode(docs)
 }
 
 func main() {
