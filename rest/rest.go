@@ -50,7 +50,7 @@ func createDocs() []document {
 			Payload:     "data:string",
 		},
 		{
-			URL:         url("/block/{id}"),
+			URL:         url("/block/{height}"),
 			Method:      "GET",
 			Description: "See a block",
 		},
@@ -79,7 +79,9 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 
 func getBlock(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
+	height := utils.StrToInt(vars["height"])
+	block := blockchain.GetBlockchain().GetBlock(height)
+	json.NewEncoder(w).Encode(block)
 }
 
 func postBlock(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +99,7 @@ func Start(portNum int) {
 	router.HandleFunc("/", handleDocs).Methods("GET")
 	router.HandleFunc("/blocks", handleBlocks).Methods("GET")
 	router.HandleFunc("/block", handleBlock).Methods("POST")
-	router.HandleFunc("/block/{id:[0-9]+}", handleBlock).Methods("GET")
+	router.HandleFunc("/block/{height:[0-9]+}", handleBlock).Methods("GET")
 
 	fmt.Printf("Rest Server listening on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, router))
