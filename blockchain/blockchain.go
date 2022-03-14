@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/daveg7lee/nomadcoin/block"
@@ -12,6 +13,7 @@ type blockchain struct {
 
 var b *blockchain
 var once sync.Once
+var ErrNotFound = errors.New("Block not found")
 
 func (b *blockchain) AddBlock(data string) {
 	newBlock := block.CreateBlock(data, b.getLastHash(), len(b.blocks)+1)
@@ -30,8 +32,11 @@ func (b *blockchain) GetAllBlocks() []*block.Block {
 	return b.blocks
 }
 
-func (b *blockchain) GetBlock(height int) *block.Block {
-	return b.blocks[height-1]
+func (b *blockchain) GetBlock(height int) (*block.Block, error) {
+	if height > len(b.blocks) {
+		return nil, ErrNotFound
+	}
+	return b.blocks[height-1], nil
 }
 
 func GetBlockchain() *blockchain {
