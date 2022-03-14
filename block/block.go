@@ -1,8 +1,9 @@
 package block
 
 import (
-	"crypto/sha256"
 	"fmt"
+
+	"github.com/daveg7lee/nomadcoin/utils"
 )
 
 type Block struct {
@@ -13,12 +14,15 @@ type Block struct {
 }
 
 func (b *Block) calculateHash() {
-	hash := sha256.Sum256([]byte(b.Data + b.PrevHash))
-	b.Hash = fmt.Sprintf("%x", hash)
+	b.Hash = utils.Hash([]byte(b.Data + b.PrevHash + fmt.Sprint(b.Height)))
 }
 
 func CreateBlock(data, lastHash string, height int) *Block {
-	newBlock := Block{Data: data, Hash: "", PrevHash: lastHash, Height: height}
+	newBlock := &Block{
+		Data: data, Hash: "",
+		PrevHash: lastHash,
+		Height:   height,
+	}
 	newBlock.calculateHash()
-	return &newBlock
+	return newBlock
 }
