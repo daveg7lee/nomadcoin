@@ -7,18 +7,7 @@ import (
 )
 
 func main() {
-	boldText := color.New(color.FgHiWhite, color.Bold)
-
 	if len(os.Args) < 2 {
-		usage()
-	}
-
-	switch os.Args[1] {
-	case "explorer":
-		boldText.Println("Start HTML Explorer")
-	case "rest":
-		boldText.Println("Start REST API")
-	default:
 		usage()
 	}
 }
