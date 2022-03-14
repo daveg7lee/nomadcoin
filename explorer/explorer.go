@@ -28,7 +28,7 @@ func getYear() int {
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	data := pageData{PageTitle: "Home", Blocks: blockchain.GetBlockchain().GetAllBlocks(), Year: getYear()}
+	data := pageData{PageTitle: "Home", Blocks: blockchain.Blockchain().AllBlocks(), Year: getYear()}
 	templates.ExecuteTemplate(w, "home", data)
 }
 
@@ -49,7 +49,7 @@ func getAdd(w http.ResponseWriter) {
 func postAdd(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	data := r.Form.Get("blockData")
-	blockchain.GetBlockchain().AddBlock(data)
+	blockchain.Blockchain().AddBlock(data)
 	http.Redirect(w, r, "/", http.StatusPermanentRedirect)
 }
 

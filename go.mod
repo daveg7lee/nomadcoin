@@ -3,6 +3,7 @@ module github.com/daveg7lee/nomadcoin
 go 1.17
 
 require (
+	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect

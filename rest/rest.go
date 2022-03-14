@@ -67,7 +67,7 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBlocks(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(blockchain.GetBlockchain().GetAllBlocks())
+	json.NewEncoder(w).Encode(blockchain.Blockchain().AllBlocks())
 }
 
 func handleBlock(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +82,7 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 func getBlock(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	height := utils.StrToInt(vars["height"])
-	block, err := blockchain.GetBlockchain().GetBlock(height)
+	block, err := blockchain.Blockchain().Block(height)
 	encoder := json.NewEncoder(w)
 	if err == blockchain.ErrNotFound {
 		encoder.Encode(errorResponse{fmt.Sprint(err)})
@@ -95,7 +95,7 @@ func postBlock(w http.ResponseWriter, r *http.Request) {
 	var addBlockBody addBlockBody
 
 	utils.HandleErr(json.NewDecoder(r.Body).Decode(&addBlockBody))
-	blockchain.GetBlockchain().AddBlock(addBlockBody.Message)
+	blockchain.Blockchain().AddBlock(addBlockBody.Message)
 	w.WriteHeader(http.StatusCreated)
 }
 

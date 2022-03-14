@@ -16,11 +16,11 @@ var once sync.Once
 var ErrNotFound = errors.New("Block not found")
 
 func (b *blockchain) AddBlock(data string) {
-	newBlock := block.CreateBlock(data, b.getLastHash(), len(b.blocks)+1)
+	newBlock := block.CreateBlock(data, b.lastHash(), len(b.blocks)+1)
 	b.blocks = append(b.blocks, newBlock)
 }
 
-func (b *blockchain) getLastHash() string {
+func (b *blockchain) lastHash() string {
 	totalBlocks := len(b.blocks)
 	if totalBlocks == 0 {
 		return ""
@@ -28,18 +28,18 @@ func (b *blockchain) getLastHash() string {
 	return b.blocks[totalBlocks-1].Hash
 }
 
-func (b *blockchain) GetAllBlocks() []*block.Block {
+func (b *blockchain) AllBlocks() []*block.Block {
 	return b.blocks
 }
 
-func (b *blockchain) GetBlock(height int) (*block.Block, error) {
+func (b *blockchain) Block(height int) (*block.Block, error) {
 	if height > len(b.blocks) {
 		return nil, ErrNotFound
 	}
 	return b.blocks[height-1], nil
 }
 
-func GetBlockchain() *blockchain {
+func Blockchain() *blockchain {
 	if b == nil {
 		once.Do(initBlockchain)
 	}
