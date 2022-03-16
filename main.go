@@ -1,7 +1,13 @@
 package main
 
-import "github.com/daveg7lee/nomadcoin/blockchain"
+import (
+	"github.com/daveg7lee/nomadcoin/blockchain"
+)
 
 func main() {
-	blockchain.Blockchain()
+	chain := blockchain.Blockchain()
+
+	chain.AddBlock("firstBlock")
+	chain.AddBlock("secondBlock")
+	chain.AddBlock("thridBlock")
 }

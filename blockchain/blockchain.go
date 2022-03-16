@@ -4,6 +4,8 @@ import (
 	"sync"
 
 	"github.com/daveg7lee/nomadcoin/block"
+	"github.com/daveg7lee/nomadcoin/db"
+	"github.com/daveg7lee/nomadcoin/utils"
 )
 
 type blockchain struct {
@@ -23,11 +25,16 @@ func Blockchain() *blockchain {
 
 func initBlockchain() {
 	b = &blockchain{NewestHash: "", Height: 0}
-	newBlock := block.CreateBlock("Genesis", Blockchain().NewestHash, Blockchain().Height+1)
-	b.AddBlock(newBlock)
+	b.AddBlock("Genesis Block")
 }
 
-func (b *blockchain) AddBlock(block *block.Block) {
-	b.NewestHash = block.Hash
-	b.Height = block.Height
+func (b *blockchain) AddBlock(data string) {
+	newBlock := block.CreateBlock(data, b.NewestHash, b.Height)
+	b.NewestHash = newBlock.Hash
+	b.Height = newBlock.Height
+	b.persist()
+}
+
+func (b *blockchain) persist() {
+	db.SaveBlockchain(utils.ToBytes(b))
 }

@@ -1,8 +1,6 @@
 package block
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 
 	"github.com/daveg7lee/nomadcoin/db"
@@ -20,15 +18,8 @@ func (b *Block) calculateHash() {
 	b.Hash = utils.Hash([]byte(b.Data + b.PrevHash + fmt.Sprint(b.Height)))
 }
 
-func (b *Block) toBytes() []byte {
-	var blockBuffer bytes.Buffer
-	encoder := gob.NewEncoder(&blockBuffer)
-	utils.HandleErr(encoder.Encode(b))
-	return blockBuffer.Bytes()
-}
-
 func (b *Block) persist() {
-	db.SaveBlock(b.Hash, b.toBytes())
+	db.SaveBlock(b.Hash, utils.ToBytes(b))
 }
 
 func CreateBlock(data, lastHash string, height int) *Block {
