@@ -1,9 +1,6 @@
 package blockchain
 
 import (
-	"bytes"
-	"encoding/gob"
-	"fmt"
 	"sync"
 
 	"github.com/daveg7lee/nomadcoin/block"
@@ -23,13 +20,11 @@ func Blockchain() *blockchain {
 	if b == nil {
 		once.Do(initBlockchain)
 	}
-	fmt.Printf("Newest Hash: %s\n Height: %d\n", b.NewestHash, b.Height)
 	return b
 }
 
 func initBlockchain() {
 	b = &blockchain{NewestHash: "", Height: 0}
-	fmt.Printf("Newest Hash: %s\n Height: %d\n", b.NewestHash, b.Height)
 	checkpoint := db.Checkpoint()
 	if checkpoint == nil {
 		b.AddBlock("Genesis Block")
@@ -50,6 +45,5 @@ func (b *blockchain) persist() {
 }
 
 func (b *blockchain) restore(data []byte) {
-	decoder := gob.NewDecoder(bytes.NewReader(data))
-	utils.HandleErr(decoder.Decode(b))
+	utils.FromBytes(b, data)
 }

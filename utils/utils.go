@@ -6,19 +6,12 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log"
-	"strconv"
 )
 
 func HandleErr(err error) {
 	if err != nil {
 		log.Panic(err)
 	}
-}
-
-func StrToInt(data string) int {
-	intData, err := strconv.Atoi(data)
-	HandleErr(err)
-	return intData
 }
 
 func Hash(data []byte) string {
@@ -31,4 +24,9 @@ func ToBytes(data interface{}) []byte {
 	encoder := gob.NewEncoder(&dataBuffer)
 	HandleErr(encoder.Encode(data))
 	return dataBuffer.Bytes()
+}
+
+func FromBytes(i interface{}, data []byte) {
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	HandleErr(decoder.Decode(i))
 }

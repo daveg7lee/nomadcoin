@@ -1,6 +1,7 @@
 package block
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/daveg7lee/nomadcoin/db"
@@ -14,12 +15,18 @@ type Block struct {
 	PrevHash string `json:"previous hash,omitempty"`
 }
 
+var ErrorNotFound = errors.New("block not found")
+
 func (b *Block) calculateHash() {
 	b.Hash = utils.Hash([]byte(b.Data + b.PrevHash + fmt.Sprint(b.Height)))
 }
 
 func (b *Block) persist() {
 	db.SaveBlock(b.Hash, utils.ToBytes(b))
+}
+
+func (b *Block) restore(data []byte) {
+	utils.FromBytes(b, data)
 }
 
 func CreateBlock(data, lastHash string, height int) *Block {
@@ -31,4 +38,14 @@ func CreateBlock(data, lastHash string, height int) *Block {
 	newBlock.calculateHash()
 	newBlock.persist()
 	return newBlock
+}
+
+func FindBlock(hash string) (*Block, error) {
+	blockBytes := db.Block(hash)
+	if blockBytes == nil {
+		return nil, ErrorNotFound
+	}
+	block := &Block{}
+	block.restore(blockBytes)
+	return block, nil
 }

@@ -28,8 +28,8 @@ func getYear() int {
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	data := pageData{PageTitle: "Home", Blocks: blockchain.Blockchain().AllBlocks(), Year: getYear()}
-	templates.ExecuteTemplate(w, "home", data)
+	//data := pageData{PageTitle: "Home", Blocks: blockchain.Blockchain().AllBlocks(), Year: getYear()}
+	//templates.ExecuteTemplate(w, "home", data)
 }
 
 func handleAdd(w http.ResponseWriter, r *http.Request) {

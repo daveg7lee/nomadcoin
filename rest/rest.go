@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/daveg7lee/nomadcoin/block"
 	"github.com/daveg7lee/nomadcoin/blockchain"
 	"github.com/daveg7lee/nomadcoin/utils"
 	"github.com/gorilla/mux"
@@ -54,7 +55,7 @@ func createDocs() []document {
 			Payload:     "data:string",
 		},
 		{
-			URL:         url("/block/{height}"),
+			URL:         url("/block/{hash}"),
 			Method:      "GET",
 			Description: "See a block",
 		},
@@ -67,7 +68,7 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBlocks(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(blockchain.Blockchain().AllBlocks())
+	//json.NewEncoder(w).Encode(blockchain.Blockchain().AllBlocks())
 }
 
 func handleBlock(w http.ResponseWriter, r *http.Request) {
@@ -81,13 +82,13 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 
 func getBlock(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	height := utils.StrToInt(vars["height"])
-	block, err := blockchain.Blockchain().Block(height)
+	hash := vars["hash"]
+	data, err := block.FindBlock(hash)
 	encoder := json.NewEncoder(w)
-	if err == blockchain.ErrNotFound {
+	if err == block.ErrorNotFound {
 		encoder.Encode(errorResponse{fmt.Sprint(err)})
 	} else {
-		encoder.Encode(block)
+		encoder.Encode(data)
 	}
 }
 
@@ -116,7 +117,7 @@ func Start(portNum int) {
 	router.HandleFunc("/", handleDocs).Methods("GET")
 	router.HandleFunc("/blocks", handleBlocks).Methods("GET")
 	router.HandleFunc("/block", handleBlock).Methods("POST")
-	router.HandleFunc("/block/{height:[0-9]+}", handleBlock).Methods("GET")
+	router.HandleFunc("/block/{hash:[a-f0-9]+}", handleBlock).Methods("GET")
 
 	fmt.Printf("Rest Server listening on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, router))
