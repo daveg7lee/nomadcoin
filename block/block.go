@@ -9,10 +9,12 @@ import (
 )
 
 type Block struct {
-	Height   int    `json:"height"`
-	Data     string `json:"data"`
-	Hash     string `json:"hash"`
-	PrevHash string `json:"previous hash,omitempty"`
+	Height     int    `json:"height"`
+	Data       string `json:"data"`
+	Hash       string `json:"hash"`
+	PrevHash   string `json:"previous hash,omitempty"`
+	Difficulty int    `json:"difficulty"`
+	Nonce      int    `json:"nonce"`
 }
 
 var ErrorNotFound = errors.New("block not found")
