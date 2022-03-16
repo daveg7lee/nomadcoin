@@ -3,6 +3,7 @@ package cli
 import (
 	"flag"
 	"os"
+	"runtime"
 
 	"github.com/daveg7lee/nomadcoin/explorer"
 	"github.com/daveg7lee/nomadcoin/rest"
@@ -40,6 +41,6 @@ func usage() {
 		color.Red("Please use the following flags:\n\n")
 		color.Cyan("-port:     Set the port of the server")
 		color.Cyan("-mode:     Choose between 'html', 'rest', and 'both'")
-		os.Exit(0)
+		runtime.Goexit()
 	}
 }

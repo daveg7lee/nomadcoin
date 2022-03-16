@@ -68,7 +68,7 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBlocks(w http.ResponseWriter, r *http.Request) {
-	//json.NewEncoder(w).Encode(blockchain.Blockchain().AllBlocks())
+	json.NewEncoder(w).Encode(blockchain.Blockchain().Blocks())
 }
 
 func handleBlock(w http.ResponseWriter, r *http.Request) {

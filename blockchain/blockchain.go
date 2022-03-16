@@ -47,3 +47,18 @@ func (b *blockchain) persist() {
 func (b *blockchain) restore(data []byte) {
 	utils.FromBytes(b, data)
 }
+
+func (b *blockchain) Blocks() []*block.Block {
+	var blocks []*block.Block
+	hashCursor := b.NewestHash
+	for {
+		block, _ := block.FindBlock(hashCursor)
+		blocks = append(blocks, block)
+		if block.PrevHash != "" {
+			hashCursor = block.PrevHash
+		} else {
+			break
+		}
+	}
+	return blocks
+}
