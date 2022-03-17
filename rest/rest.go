@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/daveg7lee/nomadcoin/block"
 	"github.com/daveg7lee/nomadcoin/blockchain"
 	"github.com/daveg7lee/nomadcoin/utils"
 	"github.com/gorilla/mux"
@@ -83,9 +82,9 @@ func handleBlock(w http.ResponseWriter, r *http.Request) {
 func getBlock(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	hash := vars["hash"]
-	data, err := block.FindBlock(hash)
+	data, err := blockchain.FindBlock(hash)
 	encoder := json.NewEncoder(w)
-	if err == block.ErrorNotFound {
+	if err == blockchain.ErrorNotFound {
 		encoder.Encode(errorResponse{fmt.Sprint(err)})
 	} else {
 		encoder.Encode(data)

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/daveg7lee/nomadcoin/block"
 	"github.com/daveg7lee/nomadcoin/blockchain"
 	"github.com/gorilla/mux"
 )
@@ -18,7 +17,7 @@ var templates *template.Template
 
 type pageData struct {
 	PageTitle string
-	Blocks    []*block.Block
+	Blocks    []*blockchain.Block
 	Year      int
 }
 

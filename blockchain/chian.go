@@ -16,6 +16,8 @@ type blockchain struct {
 const (
 	defaultDifficulty  int = 2
 	difficultyInterval int = 5
+	blockInterval      int = 3
+	allowedRange       int = 1
 )
 
 var b *blockchain
@@ -42,6 +44,7 @@ func (b *blockchain) AddBlock(data string) {
 	newBlock := CreateBlock(data, b.NewestHash, b.Height+1)
 	b.NewestHash = newBlock.Hash
 	b.Height = newBlock.Height
+	b.CurrentDifficulty = newBlock.Difficulty
 	b.persist()
 }
 
@@ -69,12 +72,26 @@ func (b *blockchain) Blocks() []Block {
 }
 
 func (b *blockchain) difficulty() int {
-	if b.Height == 00 {
+	if b.Height == 0 {
 		return defaultDifficulty
 	} else if b.Height%difficultyInterval == 0 {
-
+		return b.calculateDifficulty()
 	} else {
 		return b.CurrentDifficulty
 	}
-	return 2
+}
+
+func (b *blockchain) calculateDifficulty() int {
+	allBlocks := b.Blocks()
+	newestBlock := allBlocks[0]
+	lastCalculatedBlock := allBlocks[difficultyInterval-1]
+	actualTime := (newestBlock.Timestamp / 60) - (lastCalculatedBlock.Timestamp / 60)
+	expectedTime := difficultyInterval * blockInterval
+
+	if actualTime <= (expectedTime - allowedRange) {
+		return b.CurrentDifficulty + 1
+	} else if actualTime >= (expectedTime + allowedRange) {
+		return b.CurrentDifficulty - 1
+	}
+	return b.CurrentDifficulty
 }
