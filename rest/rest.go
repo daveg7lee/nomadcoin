@@ -43,6 +43,11 @@ func createDocs() []document {
 			Description: "See Documentation",
 		},
 		{
+			URL:         url("/status"),
+			Method:      "GET",
+			Description: "See the Status of the Blockchain",
+		},
+		{
 			URL:         url("/blocks"),
 			Method:      "GET",
 			Description: "Get all blocks",
@@ -108,12 +113,17 @@ func setJsonContentTypeMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func handleStatus(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(blockchain.Blockchain())
+}
+
 func Start(portNum int) {
 	router := mux.NewRouter()
 	port = fmt.Sprintf(":%d", portNum)
 
 	router.Use(setJsonContentTypeMiddleware)
 	router.HandleFunc("/", handleDocs).Methods("GET")
+	router.HandleFunc("/status", handleStatus).Methods("GET")
 	router.HandleFunc("/blocks", handleBlocks).Methods("GET")
 	router.HandleFunc("/block", handleBlock).Methods("POST")
 	router.HandleFunc("/block/{hash:[a-f0-9]+}", handleBlock).Methods("GET")
