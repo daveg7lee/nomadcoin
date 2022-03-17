@@ -14,8 +14,9 @@ func HandleErr(err error) {
 	}
 }
 
-func Hash(data []byte) string {
-	hash := sha256.Sum256(data)
+func Hash(i interface{}) string {
+	data := fmt.Sprintf("%v", i)
+	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
 }
 

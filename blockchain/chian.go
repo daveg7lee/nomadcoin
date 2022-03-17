@@ -3,15 +3,20 @@ package blockchain
 import (
 	"sync"
 
-	"github.com/daveg7lee/nomadcoin/block"
 	"github.com/daveg7lee/nomadcoin/db"
 	"github.com/daveg7lee/nomadcoin/utils"
 )
 
 type blockchain struct {
-	NewestHash string `json:"newest hash"`
-	Height     int    `json:"height"`
+	NewestHash        string `json:"newest hash"`
+	Height            int    `json:"height"`
+	CurrentDifficulty int    `json:"Current Difficulty"`
 }
+
+const (
+	defaultDifficulty  int = 2
+	difficultyInterval int = 5
+)
 
 var b *blockchain
 var once sync.Once
@@ -24,7 +29,7 @@ func Blockchain() *blockchain {
 }
 
 func initBlockchain() {
-	b = &blockchain{NewestHash: "", Height: 0}
+	b = &blockchain{Height: 0}
 	checkpoint := db.Checkpoint()
 	if checkpoint == nil {
 		b.AddBlock("Genesis Block")
@@ -34,7 +39,7 @@ func initBlockchain() {
 }
 
 func (b *blockchain) AddBlock(data string) {
-	newBlock := block.CreateBlock(data, b.NewestHash, b.Height+1)
+	newBlock := CreateBlock(data, b.NewestHash, b.Height+1)
 	b.NewestHash = newBlock.Hash
 	b.Height = newBlock.Height
 	b.persist()
@@ -48,12 +53,12 @@ func (b *blockchain) restore(data []byte) {
 	utils.FromBytes(b, data)
 }
 
-func (b *blockchain) Blocks() []*block.Block {
-	var blocks []*block.Block
+func (b *blockchain) Blocks() []Block {
+	var blocks []Block
 	hashCursor := b.NewestHash
 	for {
-		block, _ := block.FindBlock(hashCursor)
-		blocks = append(blocks, block)
+		block, _ := FindBlock(hashCursor)
+		blocks = append(blocks, *block)
 		if block.PrevHash != "" {
 			hashCursor = block.PrevHash
 		} else {
@@ -61,4 +66,15 @@ func (b *blockchain) Blocks() []*block.Block {
 		}
 	}
 	return blocks
+}
+
+func (b *blockchain) difficulty() int {
+	if b.Height == 00 {
+		return defaultDifficulty
+	} else if b.Height%difficultyInterval == 0 {
+
+	} else {
+		return b.CurrentDifficulty
+	}
+	return 2
 }

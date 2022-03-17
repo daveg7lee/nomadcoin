@@ -1,16 +1,13 @@
-package block
+package blockchain
 
 import (
-	"crypto/sha256"
 	"errors"
-	"fmt"
 	"strings"
+	"time"
 
 	"github.com/daveg7lee/nomadcoin/db"
 	"github.com/daveg7lee/nomadcoin/utils"
 )
-
-const difficulty int = 2
 
 type Block struct {
 	Height     int    `json:"height"`
@@ -19,6 +16,7 @@ type Block struct {
 	PrevHash   string `json:"previous hash,omitempty"`
 	Difficulty int    `json:"difficulty"`
 	Nonce      int    `json:"nonce"`
+	Timestamp  int    `json:"timestamp"`
 }
 
 var ErrorNotFound = errors.New("block not found")
@@ -26,9 +24,8 @@ var ErrorNotFound = errors.New("block not found")
 func (b *Block) mine() {
 	target := strings.Repeat("0", b.Difficulty)
 	for {
-		blockAsBytes := []byte(fmt.Sprint(b))
-		hash := fmt.Sprintf("%x", sha256.Sum256(blockAsBytes))
-		fmt.Printf("Block as String:%s\nHash:%s\nTarget:%s\nNonce:%d\n\n\n", blockAsBytes, hash, target, b.Nonce)
+		b.Timestamp = int(time.Now().Unix())
+		hash := utils.Hash(b)
 		if strings.HasPrefix(hash, target) {
 			b.Hash = hash
 			break
@@ -51,7 +48,7 @@ func CreateBlock(data, lastHash string, height int) *Block {
 		Data: data, Hash: "",
 		PrevHash:   lastHash,
 		Height:     height,
-		Difficulty: difficulty,
+		Difficulty: Blockchain().difficulty(),
 		Nonce:      0,
 	}
 	newBlock.mine()
