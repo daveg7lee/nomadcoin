@@ -15,3 +15,6 @@ POST http://localhost:4000/block
 
 ###     
 http://localhost:4000/block/00d5395e905f6f20f4a3558e73cb73bad4e0180b832c34fe1a6ff7a6a6ec8a54
+
+###
+http://localhost:4000/balance/dave?total=true

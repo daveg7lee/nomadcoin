@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/daveg7lee/nomadcoin/blockchain"
+	"github.com/daveg7lee/nomadcoin/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -28,6 +29,11 @@ type document struct {
 
 type errorResponse struct {
 	ErrorMessage string `json:"error message"`
+}
+
+type balanceResponse struct {
+	Address string `json:"address"`
+	Amount  int    `json:"amount"`
 }
 
 func createDocs() []document {
@@ -57,6 +63,11 @@ func createDocs() []document {
 			URL:         url("/block/{hash}"),
 			Method:      "GET",
 			Description: "See a block",
+		},
+		{
+			URL:         url("/balance/{address}"),
+			Method:      "GET",
+			Description: "Get TxOuts for an Address",
 		},
 	}
 }
@@ -109,6 +120,32 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(blockchain.Blockchain())
 }
 
+func handleBalance(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+	total := r.URL.Query().Get("total")
+
+	switch total {
+	case "true":
+		handleTotalBalance(w, address)
+	default:
+		handleTxOuts(w, address)
+	}
+}
+
+func handleTotalBalance(w http.ResponseWriter, address string) {
+	amount := blockchain.Blockchain().BalanceByAddress(address)
+	utils.HandleErr(json.NewEncoder(w).Encode(balanceResponse{
+		Address: address,
+		Amount:  amount,
+	}))
+}
+
+func handleTxOuts(w http.ResponseWriter, address string) {
+	txOuts := blockchain.Blockchain().TxOutsByAddress(address)
+	utils.HandleErr(json.NewEncoder(w).Encode(txOuts))
+}
+
 func Start(portNum int) {
 	router := mux.NewRouter()
 	port = fmt.Sprintf(":%d", portNum)
@@ -119,6 +156,7 @@ func Start(portNum int) {
 	router.HandleFunc("/blocks", handleBlocks).Methods("GET")
 	router.HandleFunc("/block", handleBlock).Methods("POST")
 	router.HandleFunc("/block/{hash:[a-f0-9]+}", handleBlock).Methods("GET")
+	router.HandleFunc("/balance/{address}", handleBalance).Methods("GET")
 
 	fmt.Printf("Rest Server listening on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, router))
