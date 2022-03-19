@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -27,7 +26,6 @@ func (b *Block) mine() {
 	for {
 		b.Timestamp = int(time.Now().Unix())
 		hash := utils.Hash(b)
-		fmt.Printf("Target:%s\n Hash:%s\n Nonce:%d\n\n\n", target, hash, b.Nonce)
 		if strings.HasPrefix(hash, target) {
 			b.Hash = hash
 			break
@@ -55,6 +53,7 @@ func CreateBlock(lastHash string, height int) *Block {
 		Nonce:        0,
 	}
 	newBlock.mine()
+	newBlock.Transactions = Mempool.TxToConfirm()
 	newBlock.persist()
 	return newBlock
 }
