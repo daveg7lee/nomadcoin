@@ -48,16 +48,45 @@ func (t *Tx) calculateId() {
 }
 
 func makeTx(from, to string, amount int) (*Tx, error) {
+	var txIns []*TxIn
+	var txOuts []*TxOut
+	oldTxOuts := Blockchain().TxOutsByAddress(from)
+	total := 0
+
 	if checkHaveEnoughMoney(from, amount) {
 		return nil, errors.New("not enough money")
 	}
+
+	for _, txOut := range oldTxOuts {
+		if total > amount {
+			break
+		}
+		txIn := &TxIn{Owner: txOut.Owner, Amount: txOut.Amount}
+		txIns = append(txIns, txIn)
+		total += txOut.Amount
+	}
+
+	change := total - amount
+	if change != 0 {
+		changeTxOut := &TxOut{Owner: from, Amount: change}
+		txOuts = append(txOuts, changeTxOut)
+	}
+
+	txOut := &TxOut{Owner: to, Amount: amount}
+	txOuts = append(txOuts, txOut)
+	tx := &Tx{
+		Id:        "",
+		Timestamp: int(time.Now().Unix()),
+		TxIns:     txIns,
+		TxOuts:    txOuts,
+	}
+	tx.calculateId()
+
+	return tx, nil
 }
 
 func checkHaveEnoughMoney(from string, amount int) bool {
-	if Blockchain().BalanceByAddress(from) < amount {
-		return true
-	}
-	return false
+	return Blockchain().BalanceByAddress(from) < amount
 }
 
 func makeCoinbaseTx(address string) *Tx {
