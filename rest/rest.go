@@ -69,6 +69,11 @@ func createDocs() []document {
 			Method:      "GET",
 			Description: "Get TxOuts for an Address",
 		},
+		{
+			URL:         url("/mempool"),
+			Method:      "GET",
+			Description: "Get mempool",
+		},
 	}
 }
 
@@ -146,6 +151,11 @@ func handleTxOuts(w http.ResponseWriter, address string) {
 	utils.HandleErr(json.NewEncoder(w).Encode(txOuts))
 }
 
+func handleMempool(w http.ResponseWriter, r *http.Request) {
+	mempool := blockchain.Mempool
+	utils.HandleErr(json.NewEncoder(w).Encode(mempool.Txs))
+}
+
 func Start(portNum int) {
 	router := mux.NewRouter()
 	port = fmt.Sprintf(":%d", portNum)
@@ -157,6 +167,7 @@ func Start(portNum int) {
 	router.HandleFunc("/block", handleBlock).Methods("POST")
 	router.HandleFunc("/block/{hash:[a-f0-9]+}", handleBlock).Methods("GET")
 	router.HandleFunc("/balance/{address}", handleBalance).Methods("GET")
+	router.HandleFunc("/mempool", handleMempool).Methods("GET")
 
 	fmt.Printf("Rest Server listening on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, router))
