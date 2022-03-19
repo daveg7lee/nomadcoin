@@ -11,13 +11,13 @@ import (
 )
 
 type Block struct {
-	Height     int    `json:"height"`
-	Data       string `json:"data"`
-	Hash       string `json:"hash"`
-	PrevHash   string `json:"previous hash,omitempty"`
-	Difficulty int    `json:"difficulty"`
-	Nonce      int    `json:"nonce"`
-	Timestamp  int    `json:"timestamp"`
+	Height       int    `json:"height"`
+	Transactions []*Tx  `json:"transactions"`
+	Hash         string `json:"hash"`
+	PrevHash     string `json:"previous hash,omitempty"`
+	Difficulty   int    `json:"difficulty"`
+	Nonce        int    `json:"nonce"`
+	Timestamp    int    `json:"timestamp"`
 }
 
 var ErrorNotFound = errors.New("block not found")
@@ -45,13 +45,14 @@ func (b *Block) restore(data []byte) {
 	utils.FromBytes(b, data)
 }
 
-func CreateBlock(data, lastHash string, height int) *Block {
+func CreateBlock(lastHash string, height int) *Block {
 	newBlock := &Block{
-		Data: data, Hash: "",
-		PrevHash:   lastHash,
-		Height:     height,
-		Difficulty: Blockchain().difficulty(),
-		Nonce:      0,
+		Transactions: []*Tx{makeCoinbaseTx("dave")},
+		Hash:         "",
+		PrevHash:     lastHash,
+		Height:       height,
+		Difficulty:   Blockchain().difficulty(),
+		Nonce:        0,
 	}
 	newBlock.mine()
 	newBlock.persist()

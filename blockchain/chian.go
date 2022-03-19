@@ -10,11 +10,11 @@ import (
 type blockchain struct {
 	NewestHash        string `json:"newest hash"`
 	Height            int    `json:"height"`
-	CurrentDifficulty int    `json:"Current Difficulty"`
+	CurrentDifficulty int    `json:"current difficulty"`
 }
 
 const (
-	defaultDifficulty  int = 2
+	defaultDifficulty  int = 4
 	difficultyInterval int = 5
 	blockInterval      int = 3
 	allowedRange       int = 1
@@ -34,14 +34,14 @@ func initBlockchain() {
 	b = &blockchain{Height: 0}
 	checkpoint := db.Checkpoint()
 	if checkpoint == nil {
-		b.AddBlock("Genesis Block")
+		b.AddBlock()
 	} else {
 		b.restore(checkpoint)
 	}
 }
 
-func (b *blockchain) AddBlock(data string) {
-	newBlock := CreateBlock(data, b.NewestHash, b.Height+1)
+func (b *blockchain) AddBlock() {
+	newBlock := CreateBlock(b.NewestHash, b.Height+1)
 	b.NewestHash = newBlock.Hash
 	b.Height = newBlock.Height
 	b.CurrentDifficulty = newBlock.Difficulty
