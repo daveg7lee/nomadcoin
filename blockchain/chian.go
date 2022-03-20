@@ -24,7 +24,7 @@ var b *blockchain
 var once sync.Once
 
 func (b *blockchain) AddBlock() {
-	newBlock := CreateBlock(b.NewestHash, b.Height+1)
+	newBlock := CreateBlock(b.NewestHash, b.Height+1, getDifficulty(b))
 	b.NewestHash = newBlock.Hash
 	b.Height = newBlock.Height
 	b.CurrentDifficulty = newBlock.Difficulty
@@ -69,7 +69,7 @@ func Blocks(b *blockchain) []Block {
 	return blocks
 }
 
-func difficulty(b *blockchain) int {
+func getDifficulty(b *blockchain) int {
 	if b.Height == 0 {
 		return defaultDifficulty
 	} else if b.Height%difficultyInterval == 0 {

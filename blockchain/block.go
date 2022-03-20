@@ -43,13 +43,13 @@ func (b *Block) restore(data []byte) {
 	utils.FromBytes(b, data)
 }
 
-func CreateBlock(lastHash string, height int) *Block {
+func CreateBlock(lastHash string, height, difficulty int) *Block {
 	newBlock := &Block{
 		Transactions: []*Tx{makeCoinbaseTx("dave")},
 		Hash:         "",
 		PrevHash:     lastHash,
 		Height:       height,
-		Difficulty:   difficulty(Blockchain()),
+		Difficulty:   difficulty,
 		Nonce:        0,
 	}
 	newBlock.mine()
