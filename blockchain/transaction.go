@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/daveg7lee/nomadcoin/utils"
@@ -62,7 +63,41 @@ func (t *Tx) calculateId() {
 }
 
 func makeTx(from, to string, amount int) (*Tx, error) {
+	if checkHaveEnoughMoney(from, amount) {
+		return nil, errors.New("not enough money")
+	}
 
+	var txOuts []*TxOut
+	var txIns []*TxIn
+	total := 0
+	uTxOuts := Blockchain().UTxOutsByAddress(from)
+
+	for _, uTxOut := range uTxOuts {
+		if total > amount {
+			break
+		}
+		txIn := &TxIn{TxId: uTxOut.TxId, Index: uTxOut.Index, Owner: from}
+		txIns = append(txIns, txIn)
+		total += uTxOut.Amount
+	}
+
+	if change := total - amount; change != 0 {
+		changeTxOut := &TxOut{Owner: from, Amount: change}
+		txOuts = append(txOuts, changeTxOut)
+	}
+
+	txOut := &TxOut{Owner: to, Amount: amount}
+	txOuts = append(txOuts, txOut)
+
+	tx := &Tx{
+		Id:        "",
+		Timestamp: int(time.Now().Unix()),
+		TxIns:     txIns,
+		TxOuts:    txOuts,
+	}
+	tx.calculateId()
+
+	return tx, nil
 }
 
 func checkHaveEnoughMoney(from string, amount int) bool {
