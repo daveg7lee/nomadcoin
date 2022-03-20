@@ -120,3 +120,17 @@ func makeCoinbaseTx(address string) *Tx {
 	tx.calculateId()
 	return &tx
 }
+
+func isOnMempool(uTxOut *UTxOut) bool {
+	exists := false
+
+	for _, tx := range Mempool.Txs {
+		for _, input := range tx.TxIns {
+			if input.TxId == uTxOut.TxId && input.Index == uTxOut.Index {
+				exists = true
+			}
+		}
+	}
+
+	return exists
+}
