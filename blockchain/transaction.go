@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"errors"
 	"time"
 
 	"github.com/daveg7lee/nomadcoin/utils"
@@ -19,12 +18,19 @@ type Tx struct {
 }
 
 type TxIn struct {
-	Owner  string `json:"owner"`
-	Amount int    `json:"amount"`
+	TxId  string `json:"txId"`
+	Index int    `json:"index"`
+	Owner string `json:"owner"`
 }
 
 type TxOut struct {
 	Owner  string `json:"owner"`
+	Amount int    `json:"amount"`
+}
+
+type UTxOut struct {
+	TxId   string `json:"txId`
+	Index  int    `json:"index"`
 	Amount int    `json:"amount"`
 }
 
@@ -56,41 +62,7 @@ func (t *Tx) calculateId() {
 }
 
 func makeTx(from, to string, amount int) (*Tx, error) {
-	var txIns []*TxIn
-	var txOuts []*TxOut
-	oldTxOuts := Blockchain().TxOutsByAddress(from)
-	total := 0
 
-	if checkHaveEnoughMoney(from, amount) {
-		return nil, errors.New("not enough money")
-	}
-
-	for _, txOut := range oldTxOuts {
-		if total > amount {
-			break
-		}
-		txIn := &TxIn{Owner: txOut.Owner, Amount: txOut.Amount}
-		txIns = append(txIns, txIn)
-		total += txOut.Amount
-	}
-
-	change := total - amount
-	if change != 0 {
-		changeTxOut := &TxOut{Owner: from, Amount: change}
-		txOuts = append(txOuts, changeTxOut)
-	}
-
-	txOut := &TxOut{Owner: to, Amount: amount}
-	txOuts = append(txOuts, txOut)
-	tx := &Tx{
-		Id:        "",
-		Timestamp: int(time.Now().Unix()),
-		TxIns:     txIns,
-		TxOuts:    txOuts,
-	}
-	tx.calculateId()
-
-	return tx, nil
 }
 
 func checkHaveEnoughMoney(from string, amount int) bool {
@@ -99,7 +71,7 @@ func checkHaveEnoughMoney(from string, amount int) bool {
 
 func makeCoinbaseTx(address string) *Tx {
 	txIns := []*TxIn{
-		{Owner: "COINBASE", Amount: minerReward},
+		{TxId: "", Index: -1, Owner: "COINBASE"},
 	}
 	txOuts := []*TxOut{
 		{Owner: address, Amount: minerReward},
