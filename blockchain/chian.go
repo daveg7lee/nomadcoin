@@ -96,8 +96,40 @@ func (b *blockchain) calculateDifficulty() int {
 	return b.CurrentDifficulty
 }
 
-func (b *blockchain) UTxOutsByAddress(address string) []*TxOut {
+func (b *blockchain) UTxOutsByAddress(address string) []*UTxOut {
+	var unspentTxOuts []*UTxOut
+	spentTxOuts := b.STxOutsByAddress(address)
 
+	for _, block := range b.Blocks() {
+		for _, tx := range block.Transactions {
+			for index, output := range tx.TxOuts {
+				if output.Owner == address {
+					_, ok := spentTxOuts[tx.Id]
+					if !ok {
+						unspentTxOuts = append(unspentTxOuts, &UTxOut{TxId: tx.Id, Index: index, Amount: output.Amount})
+					}
+				}
+			}
+		}
+	}
+
+	return unspentTxOuts
+}
+
+func (b *blockchain) STxOutsByAddress(address string) map[string]bool {
+	spentTxOuts := make(map[string]bool)
+
+	for _, block := range b.Blocks() {
+		for _, tx := range block.Transactions {
+			for _, input := range tx.TxIns {
+				if input.Owner == address {
+					spentTxOuts[input.TxId] = true
+				}
+			}
+		}
+	}
+
+	return spentTxOuts
 }
 
 func (b *blockchain) BalanceByAddress(address string) int {

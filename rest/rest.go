@@ -157,7 +157,7 @@ func handleTotalBalance(w http.ResponseWriter, address string) {
 }
 
 func handleTxOuts(w http.ResponseWriter, address string) {
-	txOuts := blockchain.Blockchain().TxOutsByAddress(address)
+	txOuts := blockchain.Blockchain().UTxOutsByAddress(address)
 	utils.HandleErr(json.NewEncoder(w).Encode(txOuts))
 }
 
