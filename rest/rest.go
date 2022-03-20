@@ -93,7 +93,7 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBlocks(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(blockchain.Blockchain().Blocks())
+	json.NewEncoder(w).Encode(blockchain.Blocks(blockchain.Blockchain()))
 }
 
 func handleBlock(w http.ResponseWriter, r *http.Request) {
@@ -149,7 +149,7 @@ func handleBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleTotalBalance(w http.ResponseWriter, address string) {
-	amount := blockchain.Blockchain().BalanceByAddress(address)
+	amount := blockchain.BalanceByAddress(blockchain.Blockchain(), address)
 	utils.HandleErr(json.NewEncoder(w).Encode(balanceResponse{
 		Address: address,
 		Amount:  amount,
@@ -157,7 +157,7 @@ func handleTotalBalance(w http.ResponseWriter, address string) {
 }
 
 func handleTxOuts(w http.ResponseWriter, address string) {
-	txOuts := blockchain.Blockchain().UTxOutsByAddress(address)
+	txOuts := blockchain.UTxOutsByAddress(blockchain.Blockchain(), address)
 	utils.HandleErr(json.NewEncoder(w).Encode(txOuts))
 }
 
@@ -177,10 +177,7 @@ func handleTransactions(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func Start(portNum int) {
-	router := mux.NewRouter()
-	port = fmt.Sprintf(":%d", portNum)
-
+func handleRouters(router *mux.Router) {
 	router.Use(setJsonContentTypeMiddleware)
 	router.HandleFunc("/", handleDocs).Methods("GET")
 	router.HandleFunc("/status", handleStatus).Methods("GET")
@@ -190,6 +187,13 @@ func Start(portNum int) {
 	router.HandleFunc("/balance/{address}", handleBalance).Methods("GET")
 	router.HandleFunc("/mempool", handleMempool).Methods("GET")
 	router.HandleFunc("/transaction", handleTransactions).Methods("POST")
+}
+
+func Start(portNum int) {
+	router := mux.NewRouter()
+	port = fmt.Sprintf(":%d", portNum)
+
+	handleRouters(router)
 
 	fmt.Printf("Rest Server listening on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, router))

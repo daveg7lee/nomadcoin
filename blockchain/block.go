@@ -49,7 +49,7 @@ func CreateBlock(lastHash string, height int) *Block {
 		Hash:         "",
 		PrevHash:     lastHash,
 		Height:       height,
-		Difficulty:   Blockchain().difficulty(),
+		Difficulty:   difficulty(Blockchain()),
 		Nonce:        0,
 	}
 	newBlock.mine()
