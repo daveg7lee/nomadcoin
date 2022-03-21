@@ -17,7 +17,7 @@ POST http://localhost:4000/block
 http://localhost:4000/block/00d5395e905f6f20f4a3558e73cb73bad4e0180b832c34fe1a6ff7a6a6ec8a54
 
 ###
-http://localhost:4000/balance/dave?total=true
+http://localhost:4000/balance/ac3df4ca5712d0c370d3b11070c4fb96a4a602e224d071fc49146ad52d20be200a3c97b61dc96c50afcd20326fcf7879899ba05d1605970af19a1316627c88b4
 
 ###
 http://localhost:4000/mempool
@@ -27,5 +27,8 @@ POST http://localhost:4000/transaction
 
 {
     "to": "david",
-    "amount": 5
+    "amount": 1
 }
+
+###
+http://localhost:4000/wallet

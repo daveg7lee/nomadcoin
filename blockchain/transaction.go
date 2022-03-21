@@ -45,7 +45,7 @@ var ErrorNotValid = errors.New("Tx Invalid")
 var Mempool *mempool = &mempool{}
 
 func (m *mempool) AddTx(to string, amount int) error {
-	tx, err := makeTx("dave", to, amount)
+	tx, err := makeTx(wallet.Wallet().Address, to, amount)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func validate(tx *Tx) bool {
 }
 
 func makeTx(from, to string, amount int) (*Tx, error) {
-	if checkHaveEnoughMoney(from, amount) {
+	if BalanceByAddress(Blockchain(), from) < amount {
 		return nil, ErrorNoMoney
 	}
 
@@ -130,10 +130,6 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 		return nil, ErrorNotValid
 	}
 	return tx, nil
-}
-
-func checkHaveEnoughMoney(from string, amount int) bool {
-	return BalanceByAddress(Blockchain(), from) < amount
 }
 
 func makeCoinbaseTx(address string) *Tx {

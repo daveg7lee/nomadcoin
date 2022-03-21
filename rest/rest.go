@@ -8,6 +8,7 @@ import (
 
 	"github.com/daveg7lee/nomadcoin/blockchain"
 	"github.com/daveg7lee/nomadcoin/utils"
+	"github.com/daveg7lee/nomadcoin/wallet"
 	"github.com/gorilla/mux"
 )
 
@@ -39,6 +40,10 @@ type balanceResponse struct {
 type addTxPayload struct {
 	To     string
 	Amount int
+}
+
+type walletResponse struct {
+	Address string `json:"address"`
 }
 
 func createDocs() []document {
@@ -83,6 +88,11 @@ func createDocs() []document {
 			URL:         url("/transaction"),
 			Method:      "POST",
 			Description: "Make a Transaction",
+		},
+		{
+			URL:         url("/wallet"),
+			Method:      "GET",
+			Description: "See Info of your wallet",
 		},
 	}
 }
@@ -177,6 +187,11 @@ func handleTransactions(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func handleWallet(w http.ResponseWriter, r *http.Request) {
+	address := wallet.Wallet().Address
+	json.NewEncoder(w).Encode(walletResponse{Address: address})
+}
+
 func handleRouters(router *mux.Router) {
 	router.Use(setJsonContentTypeMiddleware)
 	router.HandleFunc("/", handleDocs).Methods("GET")
@@ -186,6 +201,7 @@ func handleRouters(router *mux.Router) {
 	router.HandleFunc("/block/{hash:[a-f0-9]+}", handleBlock).Methods("GET")
 	router.HandleFunc("/balance/{address}", handleBalance).Methods("GET")
 	router.HandleFunc("/mempool", handleMempool).Methods("GET")
+	router.HandleFunc("/wallet", handleWallet).Methods("GET")
 	router.HandleFunc("/transaction", handleTransactions).Methods("POST")
 }
 
