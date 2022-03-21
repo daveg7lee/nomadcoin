@@ -40,6 +40,8 @@ const (
 	minerReward int = 10
 )
 
+var ErrorNoMoney = errors.New("not enough 돈")
+var ErrorNotValid = errors.New("Tx Invalid")
 var Mempool *mempool = &mempool{}
 
 func (m *mempool) AddTx(to string, amount int) error {
@@ -74,6 +76,15 @@ func validate(tx *Tx) bool {
 
 	for _, txIn := range tx.TxIns {
 		prevTx := FindTx(Blockchain(), txIn.TxId)
+		if prevTx == nil {
+			valid = false
+			break
+		}
+		address := prevTx.TxOuts[txIn.Index].Address
+		valid = wallet.Verify(txIn.Signature, tx.Id, address)
+		if !valid {
+			break
+		}
 	}
 
 	return valid
@@ -81,7 +92,7 @@ func validate(tx *Tx) bool {
 
 func makeTx(from, to string, amount int) (*Tx, error) {
 	if checkHaveEnoughMoney(from, amount) {
-		return nil, errors.New("not enough money")
+		return nil, ErrorNoMoney
 	}
 
 	var txOuts []*TxOut
@@ -93,17 +104,17 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 		if total >= amount {
 			break
 		}
-		txIn := &TxIn{TxId: uTxOut.TxId, Index: uTxOut.Index, Owner: from}
+		txIn := &TxIn{TxId: uTxOut.TxId, Index: uTxOut.Index, Signature: from}
 		txIns = append(txIns, txIn)
 		total += uTxOut.Amount
 	}
 
 	if change := total - amount; change != 0 {
-		changeTxOut := &TxOut{Owner: from, Amount: change}
+		changeTxOut := &TxOut{Address: from, Amount: change}
 		txOuts = append(txOuts, changeTxOut)
 	}
 
-	txOut := &TxOut{Owner: to, Amount: amount}
+	txOut := &TxOut{Address: to, Amount: amount}
 	txOuts = append(txOuts, txOut)
 
 	tx := &Tx{
@@ -114,6 +125,10 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 	}
 	tx.calculateId()
 	tx.sign()
+	valid := validate(tx)
+	if !valid {
+		return nil, ErrorNotValid
+	}
 	return tx, nil
 }
 
@@ -123,10 +138,10 @@ func checkHaveEnoughMoney(from string, amount int) bool {
 
 func makeCoinbaseTx(address string) *Tx {
 	txIns := []*TxIn{
-		{TxId: "", Index: -1, Owner: "COINBASE"},
+		{TxId: "", Index: -1, Signature: "COINBASE"},
 	}
 	txOuts := []*TxOut{
-		{Owner: address, Amount: minerReward},
+		{Address: address, Amount: minerReward},
 	}
 	tx := Tx{
 		Id:        "",

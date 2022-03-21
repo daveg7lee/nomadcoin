@@ -101,7 +101,7 @@ func UTxOutsByAddress(b *blockchain, address string) []*UTxOut {
 	for _, block := range Blocks(b) {
 		for _, tx := range block.Transactions {
 			for index, output := range tx.TxOuts {
-				if output.Owner == address {
+				if output.Address == address {
 					_, ok := spentTxOuts[tx.Id]
 					if !ok {
 						unspentTxOut := &UTxOut{TxId: tx.Id, Index: index, Amount: output.Amount}
@@ -123,7 +123,10 @@ func STxOutsByAddress(b *blockchain, address string) map[string]bool {
 	for _, block := range Blocks(b) {
 		for _, tx := range block.Transactions {
 			for _, input := range tx.TxIns {
-				if input.Owner == address {
+				if input.Signature == "COINBASE" {
+					break
+				}
+				if FindTx(b, input.TxId).TxOuts[input.Index].Address == address {
 					spentTxOuts[input.TxId] = true
 				}
 			}
