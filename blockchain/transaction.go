@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/daveg7lee/nomadcoin/utils"
+	"github.com/daveg7lee/nomadcoin/wallet"
 )
 
 type mempool struct {
@@ -51,7 +52,7 @@ func (m *mempool) AddTx(to string, amount int) error {
 }
 
 func (m *mempool) TxToConfirm() []*Tx {
-	coinbase := makeCoinbaseTx("dave")
+	coinbase := makeCoinbaseTx(wallet.Wallet().Address)
 	txs := m.Txs
 	txs = append(txs, coinbase)
 	m.Txs = nil

@@ -5,6 +5,8 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
+	"encoding/hex"
+	"fmt"
 	"os"
 
 	"github.com/daveg7lee/nomadcoin/utils"
@@ -12,7 +14,7 @@ import (
 
 type wallet struct {
 	privateKey *ecdsa.PrivateKey
-	address    string
+	Address    string
 }
 
 const (
@@ -42,7 +44,7 @@ func initWallet() {
 		persistKey(key)
 		w.privateKey = key
 	}
-	w.address = createAddress(w.privateKey)
+	w.Address = createAddress(w.privateKey)
 }
 
 func restoreKey() *ecdsa.PrivateKey {
@@ -70,5 +72,24 @@ func createPrivateKey() *ecdsa.PrivateKey {
 }
 
 func createAddress(key *ecdsa.PrivateKey) string {
+	x := key.X.Bytes()
+	y := key.Y.Bytes()
+	z := append(x, y...)
+	return fmt.Sprintf("%x", z)
+}
+
+func Sign(payload string, w *wallet) string {
+	payloadAsBytes, err := hex.DecodeString(payload)
+	utils.HandleErr(err)
+
+	r, s, err := ecdsa.Sign(rand.Reader, w.privateKey, payloadAsBytes)
+	utils.HandleErr(err)
+
+	signature := append(r.Bytes(), s.Bytes()...)
+
+	return fmt.Sprintf("%x", signature)
+}
+
+func Verify(signature, payload, publicKey string) bool {
 
 }

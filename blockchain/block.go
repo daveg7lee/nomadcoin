@@ -7,6 +7,7 @@ import (
 
 	"github.com/daveg7lee/nomadcoin/db"
 	"github.com/daveg7lee/nomadcoin/utils"
+	"github.com/daveg7lee/nomadcoin/wallet"
 )
 
 type Block struct {
@@ -45,7 +46,7 @@ func (b *Block) restore(data []byte) {
 
 func CreateBlock(lastHash string, height, difficulty int) *Block {
 	newBlock := &Block{
-		Transactions: []*Tx{makeCoinbaseTx("dave")},
+		Transactions: []*Tx{makeCoinbaseTx(wallet.Wallet().Address)},
 		Hash:         "",
 		PrevHash:     lastHash,
 		Height:       height,
