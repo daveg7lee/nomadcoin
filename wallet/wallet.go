@@ -12,6 +12,7 @@ import (
 
 type wallet struct {
 	privateKey *ecdsa.PrivateKey
+	address    string
 }
 
 const (
@@ -35,12 +36,23 @@ func hasWalletFile() bool {
 func initWallet() {
 	w = &wallet{}
 	if hasWalletFile() {
-
+		w.privateKey = restoreKey()
 	} else {
 		key := createPrivateKey()
 		persistKey(key)
 		w.privateKey = key
 	}
+	w.address = createAddress(w.privateKey)
+}
+
+func restoreKey() *ecdsa.PrivateKey {
+	keyAsbytes, err := os.ReadFile(walletName)
+	utils.HandleErr(err)
+
+	key, err := x509.ParseECPrivateKey(keyAsbytes)
+	utils.HandleErr(err)
+
+	return key
 }
 
 func persistKey(key *ecdsa.PrivateKey) {
@@ -55,4 +67,8 @@ func createPrivateKey() *ecdsa.PrivateKey {
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	utils.HandleErr(err)
 	return privateKey
+}
+
+func createAddress(key *ecdsa.PrivateKey) string {
+
 }
