@@ -143,3 +143,20 @@ func BalanceByAddress(b *blockchain, address string) int {
 
 	return amount
 }
+
+func Txs(b *blockchain) []*Tx {
+	var txs []*Tx
+	for _, block := range Blocks(b) {
+		txs = append(txs, block.Transactions...)
+	}
+	return txs
+}
+
+func FindTx(b *blockchain, targetID string) *Tx {
+	for _, tx := range Txs(b) {
+		if tx.Id == targetID {
+			return tx
+		}
+	}
+	return nil
+}
