@@ -75,7 +75,12 @@ func createPrivateKey() *ecdsa.PrivateKey {
 func createAddress(key *ecdsa.PrivateKey) string {
 	x := key.X.Bytes()
 	y := key.Y.Bytes()
-	z := append(x, y...)
+	return encodeBigInts(x, y)
+
+}
+
+func encodeBigInts(a, b []byte) string {
+	z := append(a, b...)
 	return fmt.Sprintf("%x", z)
 }
 
@@ -86,9 +91,7 @@ func Sign(payload string, w *wallet) string {
 	r, s, err := ecdsa.Sign(rand.Reader, w.privateKey, payloadAsBytes)
 	utils.HandleErr(err)
 
-	signature := append(r.Bytes(), s.Bytes()...)
-
-	return fmt.Sprintf("%x", signature)
+	return encodeBigInts(r.Bytes(), s.Bytes())
 }
 
 func Verify(signature, payload, address string) bool {
