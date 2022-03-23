@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/daveg7lee/nomadcoin/blockchain"
+	"github.com/daveg7lee/nomadcoin/p2p"
 	"github.com/daveg7lee/nomadcoin/utils"
 	"github.com/daveg7lee/nomadcoin/wallet"
 	"github.com/gorilla/mux"
@@ -94,6 +95,11 @@ func createDocs() []document {
 			Method:      "GET",
 			Description: "See Info of your wallet",
 		},
+		{
+			URL:         url("/ws"),
+			Method:      "GET",
+			Description: "Upgrade to Web Socket",
+		},
 	}
 }
 
@@ -137,6 +143,13 @@ func setJsonContentTypeMiddleware(next http.Handler) http.Handler {
 		if r.Method == "GET" {
 			w.Header().Add("Content-Type", "application/json")
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func loggerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.URL)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -197,6 +210,8 @@ func handleWallet(w http.ResponseWriter, r *http.Request) {
 
 func handleRouters(router *mux.Router) {
 	router.Use(setJsonContentTypeMiddleware)
+	router.Use(loggerMiddleware)
+
 	router.HandleFunc("/", handleDocs).Methods("GET")
 	router.HandleFunc("/status", handleStatus).Methods("GET")
 	router.HandleFunc("/blocks", handleBlocks).Methods("GET")
@@ -206,6 +221,7 @@ func handleRouters(router *mux.Router) {
 	router.HandleFunc("/mempool", handleMempool).Methods("GET")
 	router.HandleFunc("/wallet", handleWallet).Methods("GET")
 	router.HandleFunc("/transaction", handleTransactions).Methods("POST")
+	router.HandleFunc("/ws", p2p.Upgrade).Methods("GET")
 }
 
 func Start(portNum int) {
