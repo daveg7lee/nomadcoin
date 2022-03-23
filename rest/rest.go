@@ -47,6 +47,10 @@ type walletResponse struct {
 	Address string `json:"address"`
 }
 
+type addPeerPayload struct {
+	address, port string
+}
+
 func createDocs() []document {
 	return []document{
 		{
@@ -149,7 +153,7 @@ func setJsonContentTypeMiddleware(next http.Handler) http.Handler {
 
 func loggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.URL)
+		fmt.Println(r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -208,6 +212,20 @@ func handleWallet(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(walletResponse{Address: address})
 }
 
+func handlePeers(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		postPeers(w, r)
+	}
+}
+
+func postPeers(w http.ResponseWriter, r *http.Request) {
+	var payload addPeerPayload
+	json.NewDecoder(r.Body).Decode(&payload)
+	p2p.AddPeer(payload.address, payload.port)
+	w.WriteHeader(http.StatusOK)
+}
+
 func handleRouters(router *mux.Router) {
 	router.Use(setJsonContentTypeMiddleware)
 	router.Use(loggerMiddleware)
@@ -222,6 +240,7 @@ func handleRouters(router *mux.Router) {
 	router.HandleFunc("/wallet", handleWallet).Methods("GET")
 	router.HandleFunc("/transaction", handleTransactions).Methods("POST")
 	router.HandleFunc("/ws", p2p.Upgrade).Methods("GET")
+	router.HandleFunc("/peers", handlePeers).Methods("POST")
 }
 
 func Start(portNum int) {
