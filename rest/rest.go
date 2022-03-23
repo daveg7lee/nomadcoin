@@ -48,7 +48,7 @@ type walletResponse struct {
 }
 
 type addPeerPayload struct {
-	address, port string
+	Address, Port string
 }
 
 func createDocs() []document {
@@ -216,14 +216,21 @@ func handlePeers(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		postPeers(w, r)
+
+	case "GET":
+		getPeers(w)
 	}
 }
 
 func postPeers(w http.ResponseWriter, r *http.Request) {
 	var payload addPeerPayload
 	json.NewDecoder(r.Body).Decode(&payload)
-	p2p.AddPeer(payload.address, payload.port)
+	p2p.AddPeer(payload.Address, payload.Port)
 	w.WriteHeader(http.StatusOK)
+}
+
+func getPeers(w http.ResponseWriter) {
+	json.NewEncoder(w).Encode(p2p.Peers)
 }
 
 func handleRouters(router *mux.Router) {
@@ -240,7 +247,7 @@ func handleRouters(router *mux.Router) {
 	router.HandleFunc("/wallet", handleWallet).Methods("GET")
 	router.HandleFunc("/transaction", handleTransactions).Methods("POST")
 	router.HandleFunc("/ws", p2p.Upgrade).Methods("GET")
-	router.HandleFunc("/peers", handlePeers).Methods("POST")
+	router.HandleFunc("/peers", handlePeers).Methods("POST", "GET")
 }
 
 func Start(portNum int) {
