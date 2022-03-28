@@ -13,5 +13,6 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/nsf/termbox-go v0.0.0-20180819125858-b66b20ab708e // indirect
+	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 )

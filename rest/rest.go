@@ -230,7 +230,7 @@ func postPeers(w http.ResponseWriter, r *http.Request) {
 }
 
 func getPeers(w http.ResponseWriter) {
-	json.NewEncoder(w).Encode(p2p.Peers)
+	json.NewEncoder(w).Encode(p2p.AllPeers(&p2p.Peers))
 }
 
 func handleRouters(router *mux.Router) {
