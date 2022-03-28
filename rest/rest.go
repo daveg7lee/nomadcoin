@@ -225,7 +225,7 @@ func handlePeers(w http.ResponseWriter, r *http.Request) {
 func postPeers(w http.ResponseWriter, r *http.Request) {
 	var payload addPeerPayload
 	json.NewDecoder(r.Body).Decode(&payload)
-	p2p.AddPeer(payload.Address, payload.Port)
+	p2p.AddPeer(payload.Address, payload.Port, port)
 	w.WriteHeader(http.StatusOK)
 }
 
